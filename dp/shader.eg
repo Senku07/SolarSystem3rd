@@ -1,0 +1,52 @@
+const char* vertexShaderSource = R"(
+    #version 330 core 
+    layout (location = 0) in vec3 Pos;
+    layout (location = 1) in vec2 Tex;
+    layout (location = 2) in vec3 Normal;
+
+    uniform mat4 Model;
+    uniform mat4 View;
+    uniform mat4 Proj;
+
+    out vec3 NormalCoord;
+    out vec2 TexCoord;
+    out vec3 CrntPos;
+
+    void main()
+    {
+        gl_Position  = Proj * View * Model * vec4(Pos,1.0f);
+        NormalCoord = vec3(Model * vec4(Normal,0.0f));
+        TexCoord = Tex;
+        CrntPos = vec3(Model * vec4(Pos,1.0f));
+    }
+
+)";
+
+const char* fragmentShaderSource = R"(
+    #version 330 core
+    out vec4 Color;
+
+    uniform sampler2D Texture;
+    uniform float ObjInt;
+    uniform vec3 ObjColor;
+    in vec3 CrntPos;
+    in vec2 TexCoord;
+    in vec3 NormalCoord;
+
+   
+
+    void main()
+    {
+    
+    vec3 LightColor = vec3(1,1,1);
+    vec3 LightPos = vec3(0,0,0);
+
+    float ambInt = 0.1f;
+
+    vec3 normal = normalize(NormalCoord);
+    vec3 LightDir = normalize(LightPos - CrntPos);
+    float diffuse = max(dot(normal,LightDir),0);
+    
+    Color =  vec4(ObjColor+(diffuse+ambInt) * LightColor,1) * texture(Texture,TexCoord) * ObjInt;
+    };
+)";
